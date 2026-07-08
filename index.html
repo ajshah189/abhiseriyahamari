@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>Aayush Resort — Wedding Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <div class="brand">
+      <span class="brand-mark">✈</span>
+      <div class="brand-text">
+        <div class="brand-title">Aayush Resort</div>
+        <div class="brand-sub">Journey Map · 22–24 Jan 2027</div>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <input id="searchInput" type="text" placeholder="Search a room or venue… (e.g. C7, Palace)" autocomplete="off" />
+      <div id="searchResults" class="search-results hidden"></div>
+    </div>
+
+    <div class="topbar-actions">
+      <button id="navigateBtn" class="btn-ghost" title="Get directions between two points">🧭 Navigate</button>
+      <button id="worldModeBtn" class="btn-ghost" title="Toggle continent zones for rooming">🌍 Room Zones</button>
+      <button id="labelToggleBtn" class="btn-ghost" title="Toggle reference labels">Labels</button>
+      <button id="editModeBtn" class="btn-ghost" title="Edit venue/room shapes">Edit Mode</button>
+      <button id="editZonesBtn" class="btn-ghost" title="Edit continent zone areas">Edit Zones</button>
+      <button id="editRoadsBtn" class="btn-ghost" title="Edit the road network for navigation">🛣️ Edit Roads</button>
+      <button id="entryPointsBtn" class="btn-ghost" title="Edit where routes connect to each destination">📍 Entry Points</button>
+    </div>
+  </header>
+
+  <!-- NAVIGATE PANEL -->
+  <aside id="navPanel" class="hidden">
+    <div class="legend-title">Navigate</div>
+    <p class="edit-help">Pick your room and a destination — the map draws a flight path and flies you there.</p>
+    <label class="nav-label">My Room</label>
+    <select id="navFromSelect"></select>
+    <label class="nav-label">Take Me To</label>
+    <select id="navToSelect"></select>
+    <div class="edit-buttons">
+      <button id="navGoBtn">Go</button>
+      <button id="navClearBtn">Clear</button>
+    </div>
+    <div id="navEta"></div>
+  </aside>
+
+  <!-- EDIT ROADS PANEL -->
+  <aside id="roadPanel" class="hidden">
+    <div class="legend-title">Edit Roads</div>
+    <p class="edit-help">Click empty road space to drop a node. Click one node then another to connect/disconnect them. Drag a node to move it. Select a node then "Delete Node" to remove it.</p>
+    <div class="edit-buttons">
+      <button id="roadDeleteBtn">Delete Node</button>
+      <button id="roadExportBtn">Export All</button>
+    </div>
+    <textarea id="roadOutput" readonly placeholder="Selected node / exported network JSON appears here…"></textarea>
+  </aside>
+
+  <!-- ENTRY POINTS PANEL -->
+  <aside id="entryPanel" class="hidden">
+    <div class="legend-title">Entry Points</div>
+    <p class="edit-help">Pick a destination below. Click its road-facing point on the map — click directly on a grey road dot to snap exactly onto that road, or click/drag anywhere else to fine-tune freely.</p>
+    <select id="entryLocationSelect"></select>
+    <div class="edit-buttons">
+      <button id="entryResetBtn">Reset to Center</button>
+      <button id="entryExportBtn">Export All</button>
+    </div>
+    <textarea id="entryOutput" readonly placeholder="Entry point coordinates appear here…"></textarea>
+  </aside>
+
+  <!-- MAP VIEWPORT -->
+  <main id="viewport">
+    <div id="mapWrap">
+      <img id="mapImage" src="assets/map-blank.png" draggable="false" alt="Resort map" />
+      <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </main>
+
+  <!-- ZOOM CONTROLS -->
+  <div id="zoomControls">
+    <button id="zoomIn" title="Zoom in">+</button>
+    <button id="zoomReset" title="Reset view">⤾</button>
+    <button id="zoomOut" title="Zoom out">−</button>
+  </div>
+
+  <!-- HOVER TOOLTIP -->
+  <div id="tooltip" class="hidden"></div>
+
+  <!-- LEGEND / FILTERS -->
+  <aside id="legend">
+    <div class="legend-title">Show on map</div>
+    <button class="filter-chip active" data-cat="rooms">🏨 Rooms</button>
+    <button class="filter-chip active" data-cat="events">🎉 Events</button>
+    <button class="filter-chip active" data-cat="food">🍽 Food</button>
+    <button class="filter-chip active" data-cat="pools">🏊 Pools</button>
+    <button class="filter-chip active" data-cat="photo">📸 Photo Spots</button>
+    <button class="filter-chip active" data-cat="parking">🚗 Parking</button>
+    <button class="filter-chip active" data-cat="temple">🛕 Temple</button>
+    <button class="filter-chip active" data-cat="building">🏛 Buildings</button>
+  </aside>
+
+  <!-- INFO POPUP -->
+  <div id="popupOverlay" class="hidden">
+    <div id="popupCard">
+      <button id="popupClose">✕</button>
+      <div id="popupIcon"></div>
+      <div id="popupName"></div>
+      <div id="popupSubtitle"></div>
+      <div id="popupMeta"></div>
+      <div id="popupDescription"></div>
+      <div id="popupExtra"></div>
+    </div>
+  </div>
+
+  <!-- EDIT MODE PANEL (shared by Edit Mode + Edit Zones) -->
+  <aside id="editPanel" class="hidden">
+    <div class="legend-title" id="editPanelTitle">Edit Mode</div>
+    <p class="edit-help" id="editHelpText">Drag the gold dots to reshape a corner. Drag inside the shape to move the whole thing. Use "Redraw From Scratch" only if you want to trace an entirely new outline.</p>
+    <select id="editLocationSelect"></select>
+    <div id="editLocationSubModeRow" class="hidden" style="display:flex;gap:6px;margin-bottom:10px;">
+      <button id="editSubShapeBtn" class="btn-ghost active" style="flex:1;padding:7px 4px;font-size:11.5px;">Edit Shape</button>
+      <button id="editSubEntryBtn" class="btn-ghost" style="flex:1;padding:7px 4px;font-size:11.5px;">Edit Entry Point</button>
+    </div>
+    <div id="editZoneSubModeRow" class="hidden" style="display:flex;gap:6px;margin-bottom:10px;">
+      <button id="editSubAreaBtn" class="btn-ghost active" style="flex:1;padding:7px 4px;font-size:11.5px;">Edit Area</button>
+      <button id="editSubLabelBtn" class="btn-ghost" style="flex:1;padding:7px 4px;font-size:11.5px;">Edit Label Position</button>
+    </div>
+    <button id="editRedrawBtn" style="width:100%;margin-bottom:10px;background:transparent;border:1px solid var(--line);color:var(--cream);border-radius:6px;padding:8px;font-size:12px;">Redraw From Scratch</button>
+    <div class="edit-buttons">
+      <button id="editFinishBtn">Finish Shape</button>
+      <button id="editClearBtn">Revert</button>
+      <button id="editCopyBtn">Copy JSON</button>
+    </div>
+    <button id="editExportAllBtn" style="width:100%;margin-bottom:10px;background:transparent;border:1px solid var(--gold-soft);color:var(--gold);border-radius:6px;padding:8px;font-size:12px;">Export All Shapes (current session)</button>
+    <textarea id="editOutput" readonly placeholder="Traced points will appear here as [x, y] pairs…"></textarea>
+  </aside>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

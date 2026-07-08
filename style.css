@@ -1,0 +1,932 @@
+/* ==========================================================
+   DESIGN SYSTEM — tokens
+   The whole visual identity lives here. Components below only
+   reference these variables, so the product can be re-themed
+   from one place.
+   ========================================================== */
+:root {
+  /* --- Surface palette (warm charcoal, not flat black) --- */
+  --night: #0c0f14;
+  --night-2: #151a22;
+  --night-3: #1b212b;
+
+  /* Glass panels: layered translucency for real depth */
+  --panel: rgba(20, 25, 33, 0.72);
+  --panel-solid: #171d26;
+  --panel-hover: rgba(28, 35, 46, 0.82);
+
+  /* --- Brand: champagne gold + ivory --- */
+  --gold: #d4af6a;
+  --gold-bright: #e6c886;
+  --gold-soft: rgba(212, 175, 106, 0.30);
+  --gold-faint: rgba(212, 175, 106, 0.10);
+  --cream: #f5efe1;
+  --cream-dim: #b0a892;
+  --cream-faint: #736d5f;
+
+  /* Accent for arrival / wedding moments */
+  --rose: #c14a52;
+
+  /* Hairlines — warmer and softer than pure gold */
+  --line: rgba(212, 175, 106, 0.16);
+  --line-strong: rgba(212, 175, 106, 0.32);
+  --glow: rgba(212, 175, 106, 0.85);
+
+  /* --- Type --- */
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "Inter", sans-serif;
+
+  /* --- Spacing scale (4px base) --- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  /* --- Radii --- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  /* --- Elevation: layered shadows read as real light, not a drop-blur --- */
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.24), 0 2px 8px rgba(0,0,0,0.20);
+  --shadow-2: 0 4px 12px rgba(0,0,0,0.30), 0 12px 32px rgba(0,0,0,0.34);
+  --shadow-3: 0 8px 24px rgba(0,0,0,0.36), 0 30px 70px rgba(0,0,0,0.50);
+  --shadow-glow: 0 0 0 1px var(--gold-soft), 0 8px 30px rgba(212,175,106,0.14);
+
+  /* --- Motion: two curves do all the work --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);      /* settling, decelerating */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);/* gentle overshoot */
+  --t-fast: 0.16s;
+  --t-med: 0.28s;
+  --t-slow: 0.45s;
+
+  --blur: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--night);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "cv01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Consistent, on-brand focus ring for keyboard users everywhere */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+::selection { background: var(--gold-soft); color: var(--cream); }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================
+   Top bar
+   ========================================================== */
+#topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 72px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  padding: 0 var(--s-5);
+  background: linear-gradient(180deg, rgba(12,15,20,0.92), rgba(12,15,20,0.66));
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+}
+
+.brand { display: flex; align-items: center; gap: var(--s-3); flex-shrink: 0; }
+.brand-mark {
+  font-size: 20px;
+  color: var(--gold);
+  transform: rotate(45deg);
+  display: inline-block;
+  transition: transform var(--t-slow) var(--ease-spring);
+}
+.brand:hover .brand-mark { transform: rotate(45deg) translateY(-2px); }
+.brand-title {
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+.brand-sub {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  margin-top: 1px;
+}
+
+.search-wrap { position: relative; flex: 1; max-width: 440px; }
+#searchInput {
+  width: 100%;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 11px 18px 11px 42px;
+  color: var(--cream);
+  font-size: 14px;
+  outline: none;
+  transition: border-color var(--t-med) var(--ease-out),
+              box-shadow var(--t-med) var(--ease-out),
+              background var(--t-med) var(--ease-out);
+}
+/* magnifier glyph via background so no markup change is needed */
+.search-wrap::before {
+  content: "";
+  position: absolute;
+  left: 16px; top: 50%;
+  width: 15px; height: 15px;
+  transform: translateY(-50%);
+  background: var(--cream-dim);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center/contain no-repeat;
+  transition: background var(--t-med) var(--ease-out);
+  pointer-events: none;
+  z-index: 1;
+}
+.search-wrap:focus-within::before { background: var(--gold); }
+#searchInput:focus {
+  border-color: var(--gold-soft);
+  background: var(--night-3);
+  box-shadow: 0 0 0 4px var(--gold-faint);
+}
+#searchInput::placeholder { color: var(--cream-faint); }
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0; right: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  max-height: 340px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  animation: dropdownIn var(--t-med) var(--ease-out);
+}
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.search-result-item {
+  padding: 12px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease-out),
+              padding-left var(--t-fast) var(--ease-out);
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover,
+.search-result-item.active-result {
+  background: var(--gold-faint);
+  padding-left: 20px;
+}
+.search-result-item .sr-cat {
+  color: var(--cream-faint);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+.hidden { display: none !important; }
+
+.topbar-actions { display: flex; gap: var(--s-2); flex-shrink: 0; }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cream-dim);
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: color var(--t-fast) var(--ease-out),
+              border-color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out),
+              transform var(--t-fast) var(--ease-out);
+}
+.btn-ghost:hover {
+  border-color: var(--gold-soft);
+  color: var(--gold);
+  background: var(--gold-faint);
+}
+.btn-ghost:active { transform: scale(0.97); }
+.btn-ghost.active {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #2a2113;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(212,175,106,0.30);
+}
+
+/* ==========================================================
+   Map viewport
+   ========================================================== */
+#viewport {
+  position: absolute;
+  inset: 0;
+  top: 72px;
+  overflow: hidden;
+  cursor: grab;
+  background: radial-gradient(ellipse 120% 100% at 50% 40%, #141922 0%, #090b0f 100%);
+}
+#viewport.grabbing { cursor: grabbing; }
+
+#mapWrap {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+#mapImage {
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+#overlay {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+}
+
+.hotspot {
+  fill: var(--glow);
+  fill-opacity: 0;
+  stroke: var(--gold-bright);
+  stroke-opacity: 0;
+  stroke-width: 2;
+  transition: fill-opacity var(--t-med) var(--ease-out),
+              stroke-opacity var(--t-med) var(--ease-out),
+              filter var(--t-med) var(--ease-out);
+  pointer-events: all;
+  cursor: pointer;
+}
+.hotspot:hover, .hotspot.hovered {
+  fill-opacity: 0.22;
+  stroke-opacity: 0.95;
+  filter: drop-shadow(0 0 12px var(--glow));
+}
+.hotspot.dimmed { pointer-events: none; opacity: 0; }
+#overlay.edit-active .hotspot { pointer-events: none; }
+.hotspot.search-match {
+  fill-opacity: 0.32;
+  stroke-opacity: 1;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { filter: drop-shadow(0 0 5px var(--glow)); }
+  50% { filter: drop-shadow(0 0 24px var(--glow)); }
+}
+
+/* edit-mode overlay elements */
+.edit-point {
+  fill: var(--gold);
+  stroke: var(--night);
+  stroke-width: 1.5;
+}
+.edit-line {
+  stroke: var(--gold);
+  stroke-width: 2;
+  fill: rgba(201,163,77,0.15);
+}
+.edit-preview {
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  fill: rgba(201,163,77,0.08);
+  opacity: 0.75;
+  pointer-events: none;
+}
+.entry-point-marker {
+  fill: #c1272d;
+  stroke: #f3ecda;
+  stroke-width: 2.5;
+  cursor: grab;
+  filter: drop-shadow(0 0 6px rgba(193,39,45,0.7));
+}
+.entry-point-ring {
+  fill: none;
+  stroke: #c1272d;
+  stroke-width: 1.5;
+  opacity: 0.55;
+  animation: pulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ==========================================================
+   Zoom controls
+   ========================================================== */
+#zoomControls {
+  position: fixed;
+  right: var(--s-5);
+  bottom: var(--s-8);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--panel);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: var(--shadow-2);
+}
+#zoomControls button {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--cream);
+  font-size: 19px;
+  transition: color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out);
+}
+#zoomControls button:last-child { border-bottom: none; }
+#zoomControls button:hover { color: var(--gold); background: var(--gold-faint); }
+#zoomControls button:active { background: var(--gold-soft); }
+
+/* ==========================================================
+   Tooltip
+   ========================================================== */
+#tooltip {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  max-width: 240px;
+  transform: translate(-50%, calc(-100% - 16px));
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: var(--shadow-2);
+  animation: tooltipIn var(--t-fast) var(--ease-out);
+}
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translate(-50%, calc(-100% - 10px)); }
+  to   { opacity: 1; transform: translate(-50%, calc(-100% - 16px)); }
+}
+/* little caret pointing at the hotspot */
+#tooltip::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: -6px;
+  width: 10px; height: 10px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--panel);
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+#tooltip .tt-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--gold);
+  line-height: 1.2;
+}
+#tooltip .tt-sub { color: var(--cream-dim); font-size: 12px; margin-top: 2px; }
+
+/* ==========================================================
+   Legend / filters
+   ========================================================== */
+#legend {
+  position: fixed;
+  left: var(--s-5);
+  bottom: var(--s-8);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s-4);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: var(--shadow-2);
+  max-width: 200px;
+}
+.legend-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--gold);
+  margin-bottom: var(--s-2);
+  letter-spacing: 0.01em;
+}
+.filter-chip {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--cream-dim);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  text-align: left;
+  transition: color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out),
+              border-color var(--t-fast) var(--ease-out);
+}
+.filter-chip:hover { color: var(--cream); background: var(--gold-faint); }
+.filter-chip.active {
+  color: var(--cream);
+  border-color: var(--gold-soft);
+  background: var(--gold-faint);
+}
+/* dim inactive filters so the active set reads clearly */
+.filter-chip:not(.active) { opacity: 0.55; }
+
+/* ==========================================================
+   Popup — premium information card
+   ========================================================== */
+#popupOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(6,8,11,0.60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: overlayIn var(--t-med) var(--ease-out);
+}
+@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+#popupCard {
+  position: relative;
+  width: min(440px, 90vw);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(212,175,106,0.08), transparent 60%),
+    linear-gradient(180deg, var(--night-3), var(--night-2));
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xl);
+  padding: var(--s-8) var(--s-6) var(--s-6);
+  box-shadow: var(--shadow-3);
+  animation: popupIn var(--t-slow) var(--ease-spring);
+}
+@keyframes popupIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* boarding-pass perforation strip, refined */
+#popupCard::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 24px; right: 24px;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0 8px, transparent 8px 16px);
+  opacity: 0.6;
+  border-radius: 0 0 3px 3px;
+}
+#popupClose {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gold-faint);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--cream-dim);
+  font-size: 15px;
+  transition: color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out),
+              transform var(--t-fast) var(--ease-out);
+}
+#popupClose:hover { color: var(--gold); background: var(--gold-soft); transform: rotate(90deg); }
+#popupIcon {
+  font-size: 30px;
+  margin-bottom: var(--s-2);
+  line-height: 1;
+}
+#popupName {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--cream);
+  line-height: 1.08;
+  letter-spacing: 0.005em;
+}
+#popupSubtitle {
+  color: var(--gold);
+  font-size: 14px;
+  margin-top: var(--s-2);
+  letter-spacing: 0.02em;
+  font-weight: 500;
+}
+#popupMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin: var(--s-5) 0;
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--cream-dim);
+}
+#popupMeta span { display: inline-flex; flex-direction: column; gap: 2px; }
+#popupMeta span b {
+  color: var(--cream);
+  font-weight: 600;
+  font-size: 13.5px;
+  order: 2;
+}
+#popupDescription {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--cream-dim);
+}
+#popupExtra {
+  margin-top: var(--s-3);
+  font-size: 12.5px;
+  color: var(--gold);
+  letter-spacing: 0.01em;
+}
+
+/* ==========================================================
+   Edit panel
+   ========================================================== */
+#editPanel {
+  position: fixed;
+  top: 88px;
+  right: 20px;
+  z-index: 45;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  backdrop-filter: blur(6px);
+}
+.edit-help {
+  font-size: 12px;
+  color: var(--cream-dim);
+  line-height: 1.4;
+  margin: 4px 0 10px;
+}
+#editLocationSelect {
+  width: 100%;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12.5px;
+  margin-bottom: 10px;
+}
+.edit-buttons { display: flex; gap: 6px; margin-bottom: 10px; }
+.edit-buttons button {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 6px;
+  padding: 7px 4px;
+  font-size: 11.5px;
+}
+.edit-buttons button:hover { border-color: var(--gold); color: var(--gold); }
+#editOutput {
+  width: 100%;
+  height: 90px;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11px;
+  font-family: monospace;
+  resize: vertical;
+}
+
+/* ==========================================================
+   Route Navigation (Layer 5)
+   ========================================================== */
+.route-path {
+  animation: dashFlow 1.4s linear infinite;
+}
+@keyframes dashFlow {
+  to { stroke-dashoffset: -120; }
+}
+
+/* Shared glass-panel look for floating side panels (nav is guest-facing) */
+#navPanel {
+  position: fixed;
+  top: 88px;
+  left: var(--s-5);
+  z-index: 45;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: var(--shadow-2);
+  animation: panelIn var(--t-med) var(--ease-out);
+}
+@keyframes panelIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.nav-label {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cream-dim);
+  margin: var(--s-4) 0 var(--s-2);
+}
+.nav-label:first-of-type { margin-top: var(--s-2); }
+#navFromSelect, #navToSelect {
+  width: 100%;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: var(--r-sm);
+  padding: 11px 12px;
+  font-size: 13.5px;
+  font-family: var(--font-body);
+  transition: border-color var(--t-fast) var(--ease-out),
+              box-shadow var(--t-fast) var(--ease-out);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23b0a892' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+#navFromSelect:focus, #navToSelect:focus {
+  border-color: var(--gold-soft);
+  box-shadow: 0 0 0 3px var(--gold-faint);
+  outline: none;
+}
+#navGoBtn, #navClearBtn {
+  flex: 1;
+  border-radius: var(--r-sm);
+  padding: 11px 4px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: var(--s-4);
+  transition: all var(--t-fast) var(--ease-out);
+}
+#navGoBtn {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  border: 1px solid transparent;
+  color: #2a2113;
+  box-shadow: 0 2px 10px rgba(212,175,106,0.28);
+}
+#navGoBtn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(212,175,106,0.36); }
+#navGoBtn:active { transform: translateY(0) scale(0.98); }
+#navClearBtn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cream-dim);
+}
+#navClearBtn:hover { border-color: var(--gold-soft); color: var(--gold); }
+#navEta {
+  margin-top: var(--s-4);
+  font-size: 13px;
+  color: var(--gold);
+  text-align: center;
+  min-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ==========================================================
+   Road network editor
+   ========================================================== */
+.road-edge {
+  stroke: #7a8a9a;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+.road-node {
+  fill: #f3ecda;
+  stroke: #7a8a9a;
+  stroke-width: 2;
+  cursor: grab;
+}
+.road-node.selected {
+  fill: var(--gold);
+  stroke: #fff;
+}
+.road-node-ghost {
+  fill: #7a8a9a;
+  stroke: none;
+  opacity: 0.55;
+  cursor: pointer;
+}
+.road-node-ghost:hover { fill: var(--gold); opacity: 1; }
+.entry-marker {
+  fill: #2ec4d6;
+  stroke: #fff;
+  stroke-width: 2;
+  cursor: grab;
+}
+
+#entryPanel {
+  position: fixed;
+  top: 124px;
+  right: 20px;
+  z-index: 45;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  backdrop-filter: blur(6px);
+}
+#entryLocationSelect {
+  width: 100%;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12.5px;
+  margin-bottom: 10px;
+}
+#entryOutput {
+  width: 100%;
+  height: 70px;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11px;
+  font-family: monospace;
+  resize: vertical;
+  margin-top: 10px;
+}
+#entryResetBtn, #entryExportBtn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 6px;
+  padding: 8px 4px;
+  font-size: 11.5px;
+}
+#entryResetBtn:hover, #entryExportBtn:hover { border-color: var(--gold); color: var(--gold); }
+
+#roadPanel {
+  position: fixed;
+  top: 88px;
+  right: 20px;
+  z-index: 45;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  backdrop-filter: blur(6px);
+}
+#roadOutput {
+  width: 100%;
+  height: 90px;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11px;
+  font-family: monospace;
+  resize: vertical;
+  margin-top: 10px;
+}
+#roadDeleteBtn, #roadExportBtn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cream);
+  border-radius: 6px;
+  padding: 8px 4px;
+  font-size: 11.5px;
+}
+#roadDeleteBtn:hover, #roadExportBtn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ==========================================================
+   Responsive — tablet
+   ========================================================== */
+@media (max-width: 1024px) {
+  .search-wrap { max-width: 300px; }
+  .btn-ghost { padding: 9px 13px; font-size: 12.5px; }
+}
+
+/* ==========================================================
+   Responsive — phone
+   ========================================================== */
+@media (max-width: 720px) {
+  /* Topbar becomes two rows: brand+search, then a scrollable action row.
+     Six buttons never fit on one phone row, so let them scroll horizontally
+     rather than overflow or crush. */
+  #topbar {
+    height: auto;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-3) var(--s-2);
+    row-gap: var(--s-2);
+  }
+  .brand { order: 1; }
+  .search-wrap { order: 2; max-width: none; flex: 1 1 100%; }
+  .topbar-actions {
+    order: 3;
+    flex: 1 1 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .topbar-actions::-webkit-scrollbar { display: none; }
+  .brand-sub { display: none; }
+  .btn-ghost { flex-shrink: 0; }
+
+  /* viewport / panels start below the now-taller wrapped topbar */
+  #viewport { top: 128px; }
+  #legend {
+    left: var(--s-2); bottom: var(--s-2);
+    max-width: 150px; padding: var(--s-3);
+    gap: 2px;
+  }
+  .filter-chip { font-size: 12px; padding: 7px 9px; }
+  #zoomControls { right: var(--s-2); bottom: var(--s-2); }
+
+  #editPanel, #navPanel, #roadPanel, #entryPanel {
+    right: var(--s-2); left: var(--s-2); width: auto; top: 132px;
+    max-height: 60vh; overflow-y: auto;
+  }
+
+  /* Popup becomes a bottom sheet — the native mobile pattern, easy to reach
+     one-handed and dismiss with a downward flick of the eye/thumb. */
+  #popupOverlay { align-items: flex-end; }
+  #popupCard {
+    width: 100%;
+    max-width: none;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    padding: var(--s-6) var(--s-5) calc(var(--s-6) + env(safe-area-inset-bottom, 0px));
+    animation: sheetIn var(--t-slow) var(--ease-out);
+  }
+  @keyframes sheetIn {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* grab-handle affordance at the top of the sheet */
+  #popupCard::before {
+    left: 50%; right: auto;
+    transform: translateX(-50%);
+    top: 10px;
+    width: 40px; height: 4px;
+    border-radius: var(--r-pill);
+    background: var(--line-strong);
+    opacity: 1;
+  }
+  #popupName { font-size: 26px; }
+  #popupClose { top: 18px; right: 16px; }
+}
