@@ -260,6 +260,41 @@ button {
   box-shadow: 0 2px 10px rgba(212,175,106,0.30);
 }
 
+/* Discreet organiser-tools toggle — small, quiet, ignored by guests */
+.btn-icon {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--cream-faint);
+  font-size: 15px;
+  transition: color var(--t-fast) var(--ease-out),
+              border-color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out),
+              transform var(--t-med) var(--ease-out);
+}
+.btn-icon:hover { color: var(--gold); border-color: var(--gold-soft); background: var(--gold-faint); }
+.btn-icon.active { color: var(--gold); border-color: var(--gold-soft); transform: rotate(60deg); }
+
+/* Editor tool group + separator */
+.editor-tools { display: inline-flex; gap: var(--s-2); align-items: center; }
+.toolbar-divider {
+  width: 1px; height: 22px;
+  background: var(--line);
+  flex-shrink: 0;
+  margin: 0 var(--s-1);
+}
+/* Editor buttons read as "utility": mono-ish, quieter than guest actions */
+.btn-editor {
+  font-size: 12px;
+  color: var(--cream-faint);
+  border-color: transparent;
+  background: var(--gold-faint);
+}
+.btn-editor:hover { color: var(--gold); background: var(--gold-soft); }
+
 /* ==========================================================
    Map viewport
    ========================================================== */
@@ -930,3 +965,256 @@ button {
   #popupName { font-size: 26px; }
   #popupClose { top: 18px; right: 16px; }
 }
+
+/* ==========================================================
+   APP SHELL — module navigation + module surfaces
+   The map is one module; this is the frame around all of them.
+   ========================================================== */
+
+/* Utility: fully remove a map element from layout when the map
+   module isn't the active surface. Kept separate from .hidden so
+   the map's own internal show/hide logic is never disturbed. */
+.module-hidden { display: none !important; }
+
+/* --- Persistent module navigation --- */
+#moduleNav {
+  position: fixed;
+  z-index: 80;
+  left: 50%;
+  bottom: calc(var(--s-4) + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: var(--shadow-3);
+  max-width: calc(100vw - var(--s-8));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#moduleNav::-webkit-scrollbar { display: none; }
+
+.module-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 14px;
+  min-width: 58px;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-pill);
+  color: var(--cream-faint);
+  transition: color var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out);
+}
+.module-nav-item .mn-icon { font-size: 17px; line-height: 1; }
+.module-nav-item .mn-label {
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+.module-nav-item:hover { color: var(--cream); }
+.module-nav-item.active {
+  color: var(--gold);
+  background: var(--gold-faint);
+}
+
+/* Lift the map's bottom-corner controls so the nav never covers them */
+#legend { bottom: calc(var(--s-8) + 78px); }
+#zoomControls { bottom: calc(var(--s-8) + 78px); }
+
+/* --- Non-map module surfaces --- */
+#moduleShell { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+.module {
+  position: fixed;
+  inset: 0;
+  display: block;
+  padding: var(--s-8) var(--s-5) calc(var(--s-8) + 96px);
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, #141922 0%, #090b0f 60%);
+  pointer-events: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.module[hidden] { display: none; }
+.module-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.module-enter .module-inner { animation: moduleIn var(--t-slow) var(--ease-out); }
+@keyframes moduleIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Module header — answers "where am I?" */
+.m-head {
+  text-align: center;
+  padding: var(--s-6) 0 var(--s-8);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--s-8);
+}
+.m-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: var(--s-3);
+}
+.m-title {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 7vw, 60px);
+  font-weight: 600;
+  color: var(--cream);
+  margin: 0;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+}
+.m-sub {
+  font-size: 15px;
+  color: var(--cream-dim);
+  margin: var(--s-3) 0 0;
+}
+
+/* Content region — answers "what can I do?" */
+.m-block {
+  margin-bottom: var(--s-6);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  backdrop-filter: blur(var(--blur)) saturate(1.1);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.1);
+}
+.m-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.m-block-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--cream);
+  margin: 0;
+}
+.m-soon {
+  flex-shrink: 0;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold-soft);
+  border-radius: var(--r-pill);
+  padding: 5px 11px;
+}
+.m-block-body { color: var(--cream-dim); }
+.m-placeholder {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--cream-dim);
+}
+
+/* Quick-access links on Home — answers "where next?" */
+.m-quicklinks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--s-3);
+}
+.m-quicklink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-5) var(--s-3);
+  background: var(--gold-faint);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: var(--cream);
+  transition: background var(--t-fast) var(--ease-out),
+              border-color var(--t-fast) var(--ease-out),
+              transform var(--t-fast) var(--ease-out);
+}
+.m-quicklink:hover {
+  background: var(--gold-soft);
+  border-color: var(--gold-soft);
+  transform: translateY(-2px);
+}
+.m-quicklink-icon { font-size: 24px; }
+.m-quicklink-label { font-size: 13px; letter-spacing: 0.02em; }
+
+@media (max-width: 720px) {
+  /* On phones the module nav shares the bottom with map controls, so
+     tuck legend/zoom above it and keep the nav comfortably reachable. */
+  #legend { bottom: calc(var(--s-2) + 74px); }
+  #zoomControls { bottom: calc(var(--s-2) + 74px); }
+  .module-nav-item { min-width: 50px; padding: 7px 10px; }
+  .module-nav-item .mn-label { font-size: 10px; }
+}
+
+/* ==========================================================
+   AR AIRWAYS — Passport / Profile card
+   Reuses design-system tokens so it matches every other module.
+   ========================================================== */
+.pp-card {
+  background: linear-gradient(160deg, var(--night-3), var(--night-2));
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  box-shadow: var(--shadow-2);
+  position: relative;
+  overflow: hidden;
+}
+.pp-card::before {
+  content: "";
+  position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: var(--frame, var(--gold));
+  opacity: 0.85;
+}
+.pp-card-top { display: flex; align-items: center; gap: var(--s-4); }
+.pp-avatar {
+  width: 54px; height: 54px; flex-shrink: 0;
+  border-radius: var(--r-pill);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 24px; font-weight: 600;
+  color: var(--night);
+  background: var(--frame, var(--gold));
+  box-shadow: 0 0 0 2px var(--night-2), 0 0 0 3px var(--frame, var(--gold));
+}
+.pp-id { flex: 1; min-width: 0; }
+.pp-name { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--cream); line-height: 1.1; }
+.pp-tier { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--frame, var(--gold)); margin-top: 3px; }
+.pp-balance { text-align: right; flex-shrink: 0; }
+.pp-balance-num { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--cream); line-height: 1; }
+.pp-balance-label { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream-dim); margin-top: 2px; }
+
+.pp-progress { margin-top: var(--s-5); }
+.pp-progress-row { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--cream-dim); margin-bottom: 6px; letter-spacing: 0.02em; }
+.pp-bar { height: 7px; border-radius: var(--r-pill); background: var(--night); overflow: hidden; border: 1px solid var(--line); }
+.pp-bar-fill { height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--gold), var(--gold-bright)); transition: width var(--t-slow) var(--ease-out); }
+.pp-progress-hint { font-size: 11.5px; color: var(--gold); margin-top: 6px; }
+
+.pp-stats { display: flex; gap: var(--s-3); margin-top: var(--s-5); }
+.pp-stat {
+  flex: 1; text-align: center;
+  background: var(--night); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: var(--s-3) var(--s-2);
+}
+.pp-stat b { display: block; font-family: var(--font-display); font-size: 17px; color: var(--cream); font-weight: 600; }
+.pp-stat span { display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream-faint); margin-top: 3px; }
+
+.pp-ledger { display: flex; flex-direction: column; }
+.pp-txn { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: 11px 0; border-bottom: 1px solid var(--line); }
+.pp-txn:last-child { border-bottom: none; }
+.pp-txn-main { display: flex; align-items: baseline; gap: var(--s-3); min-width: 0; }
+.pp-txn-amt { font-family: var(--font-display); font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.pp-txn-amt.pos { color: var(--gold); }
+.pp-txn-amt.neg { color: var(--rose); }
+.pp-txn-reason { font-size: 13.5px; color: var(--cream-dim); }
+.pp-txn-when { font-size: 11px; color: var(--cream-faint); flex-shrink: 0; letter-spacing: 0.02em; }
+.pp-demo { cursor: pointer; }

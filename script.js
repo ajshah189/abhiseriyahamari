@@ -20,6 +20,32 @@
     mapWrap.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
   }
 
+  // Smoothly animate the camera to a target view. Used only for
+  // programmatic moves (search fly-to, navigation fit, zoom buttons) so
+  // direct drag/wheel stays instant and 1:1. Cancels any in-flight move.
+  let camAnim = null;
+  function animateTo(target, duration) {
+    if (camAnim) cancelAnimationFrame(camAnim);
+    const from = { x: view.x, y: view.y, scale: view.scale };
+    const dur = duration || 520;
+    const start = performance.now();
+    // easeInOutCubic — settles like Apple Maps, no abrupt stop
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    function step(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const k = ease(t);
+      view.x = from.x + (target.x - from.x) * k;
+      view.y = from.y + (target.y - from.y) * k;
+      view.scale = from.scale + (target.scale - from.scale) * k;
+      applyTransform();
+      if (t < 1) camAnim = requestAnimationFrame(step);
+      else camAnim = null;
+    }
+    camAnim = requestAnimationFrame(step);
+  }
+  // Any direct manipulation should halt an in-flight camera animation.
+  function stopCamAnim() { if (camAnim) { cancelAnimationFrame(camAnim); camAnim = null; } }
+
   function fitToScreen() {
     const vw = viewport.clientWidth, vh = viewport.clientHeight;
     const scale = Math.min(vw / MAP_WIDTH, vh / MAP_HEIGHT) * 0.96;
@@ -49,16 +75,14 @@
   function flyTo(cx, cy, targetScale) {
     // cx, cy in map pixel coords
     const vw = viewport.clientWidth, vh = viewport.clientHeight;
-    const s = targetScale || Math.max(view.scale, view.maxScale * 0.55);
-    view.scale = clampScale(s);
-    view.x = vw / 2 - cx * view.scale;
-    view.y = vh / 2 - cy * view.scale;
-    applyTransform();
+    const s = clampScale(targetScale || Math.max(view.scale, view.maxScale * 0.55));
+    animateTo({ x: vw / 2 - cx * s, y: vh / 2 - cy * s, scale: s });
   }
 
   // Mouse drag to pan
   viewport.addEventListener("mousedown", (e) => {
     if (editMode) return;
+    stopCamAnim();
     dragging = true; dragged = false;
     dragStart = { x: e.clientX - view.x, y: e.clientY - view.y };
     viewport.classList.add("grabbing");
@@ -78,6 +102,7 @@
   // Wheel zoom
   viewport.addEventListener("wheel", (e) => {
     e.preventDefault();
+    stopCamAnim();
     const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
     zoomAt(e.clientX, e.clientY, factor);
   }, { passive: false });
@@ -85,12 +110,14 @@
   // Double click zoom
   viewport.addEventListener("dblclick", (e) => {
     if (editMode) return;
+    stopCamAnim();
     zoomAt(e.clientX, e.clientY, 1.6);
   });
 
   // Touch: drag + pinch
   let touchState = null;
   viewport.addEventListener("touchstart", (e) => {
+    stopCamAnim();
     if (e.touches.length === 1) {
       touchState = { mode: "pan", startX: e.touches[0].clientX - view.x, startY: e.touches[0].clientY - view.y };
     } else if (e.touches.length === 2) {
@@ -128,16 +155,25 @@
 
   viewport.addEventListener("touchend", () => { touchState = null; });
 
-  // Zoom buttons
-  document.getElementById("zoomIn").onclick = () => {
-    const r = viewport.getBoundingClientRect();
-    zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.25);
+  // Zoom buttons — eased, centred on the viewport, for a refined feel
+  function zoomButtonStep(factor) {
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const mx = vw / 2, my = vh / 2;
+    const newScale = clampScale(view.scale * factor);
+    const ratio = newScale / view.scale;
+    animateTo({
+      x: mx - (mx - view.x) * ratio,
+      y: my - (my - view.y) * ratio,
+      scale: newScale,
+    }, 320);
+  }
+  document.getElementById("zoomIn").onclick = () => zoomButtonStep(1.4);
+  document.getElementById("zoomOut").onclick = () => zoomButtonStep(1 / 1.4);
+  document.getElementById("zoomReset").onclick = () => {
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const scale = Math.min(vw / MAP_WIDTH, vh / MAP_HEIGHT) * 0.96;
+    animateTo({ x: (vw - MAP_WIDTH * scale) / 2, y: (vh - MAP_HEIGHT * scale) / 2, scale });
   };
-  document.getElementById("zoomOut").onclick = () => {
-    const r = viewport.getBoundingClientRect();
-    zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1 / 1.25);
-  };
-  document.getElementById("zoomReset").onclick = fitToScreen;
 
   window.addEventListener("resize", fitToScreen);
 
@@ -767,10 +803,11 @@
     const minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad;
     const w = maxX - minX, h = maxY - minY;
     const scale = clampScale(Math.min(vw / w, vh / h));
-    view.scale = scale;
-    view.x = vw / 2 - (minX + maxX) / 2 * scale;
-    view.y = vh / 2 - (minY + maxY) / 2 * scale;
-    applyTransform();
+    animateTo({
+      x: vw / 2 - (minX + maxX) / 2 * scale,
+      y: vh / 2 - (minY + maxY) / 2 * scale,
+      scale,
+    }, 620);
   }
 
   // ---- Road-network pathfinding (Dijkstra over ROAD_NODES/ROAD_EDGES) ----

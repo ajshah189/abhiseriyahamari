@@ -29,12 +29,33 @@
       <button id="navigateBtn" class="btn-ghost" title="Get directions between two points">🧭 Navigate</button>
       <button id="worldModeBtn" class="btn-ghost" title="Toggle continent zones for rooming">🌍 Room Zones</button>
       <button id="labelToggleBtn" class="btn-ghost" title="Toggle reference labels">Labels</button>
-      <button id="editModeBtn" class="btn-ghost" title="Edit venue/room shapes">Edit Mode</button>
-      <button id="editZonesBtn" class="btn-ghost" title="Edit continent zone areas">Edit Zones</button>
-      <button id="editRoadsBtn" class="btn-ghost" title="Edit the road network for navigation">🛣️ Edit Roads</button>
-      <button id="entryPointsBtn" class="btn-ghost" title="Edit where routes connect to each destination">📍 Entry Points</button>
+      <span class="toolbar-divider" id="editorDivider" hidden></span>
+      <span class="editor-tools" id="editorTools" hidden>
+        <button id="editModeBtn" class="btn-ghost btn-editor" title="Edit venue/room shapes">Edit Mode</button>
+        <button id="editZonesBtn" class="btn-ghost btn-editor" title="Edit continent zone areas">Edit Zones</button>
+        <button id="editRoadsBtn" class="btn-ghost btn-editor" title="Edit the road network for navigation">🛣️ Edit Roads</button>
+        <button id="entryPointsBtn" class="btn-ghost btn-editor" title="Edit where routes connect to each destination">📍 Entry Points</button>
+      </span>
+      <button id="editorToggle" class="btn-icon" title="Organiser tools" aria-label="Toggle organiser tools">⚙</button>
     </div>
   </header>
+
+  <script>
+    // Editor tools are for the couple/organisers, not guests. Hidden by
+    // default so a guest's first impression is calm (3 clear actions),
+    // revealed with the discreet ⚙ toggle. Pure show/hide — no logic change.
+    (function () {
+      var toggle = document.getElementById("editorToggle");
+      var tools = document.getElementById("editorTools");
+      var divider = document.getElementById("editorDivider");
+      toggle.addEventListener("click", function () {
+        var show = tools.hasAttribute("hidden");
+        tools.toggleAttribute("hidden", !show);
+        divider.toggleAttribute("hidden", !show);
+        toggle.classList.toggle("active", show);
+      });
+    })();
+  </script>
 
   <!-- NAVIGATE PANEL -->
   <aside id="navPanel" class="hidden">
@@ -143,5 +164,8 @@
 
   <script src="data.js"></script>
   <script src="script.js"></script>
+  <script src="ecosystem-data.js"></script>
+  <script src="ecosystem.js"></script>
+  <script src="router.js"></script>
 </body>
 </html>
